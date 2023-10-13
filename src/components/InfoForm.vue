@@ -1,22 +1,22 @@
 <template>
-    <div class="info" v-if="UsersId >= 0">
+    <div class="info">
     <main-header>
         <template #Content>
                 Сведения
         </template>
     </main-header>
-        <div class="info__content">
-            <div class="info__main-info">
-                <div class="info__img"><img :src="UsersInfo[(UsersId - 1)].img" alt="user" class="cover"></div>
-                <div class="info__number">{{UsersInfo[(UsersId - 1)].phone}}</div>
-                <div class="info__username">{{UsersInfo[(UsersId - 1)].name}}</div>
+        <div class="info__content" v-for="user in UsersInfo" :key="user.id">
+          <div class="info__main" v-if="user.mail === UsersId">
+            <div class="info__main-info" >
+                <div class="info__img"><img src="src/assets/user(1).png" alt="user" class="cover"></div>
+                <div class="info__number">{{user.phone}}</div>
+                <div class="info__username">{{user.username}}</div>
             </div>
             <div class="info__additional">
                 <div class="additional__title">Сведения</div>
                 <div class="additional__text">Занят(-а)</div>
             </div>
-            
-
+          </div>
         </div>
     </div>
 </template>
@@ -32,8 +32,7 @@ const props = defineProps({
         required: true
     },
     UsersId: {
-        type: Number,
-        default: 1
+        type: String,
     },
     UsersInfo: {
         type: Array,
@@ -56,7 +55,6 @@ const props = defineProps({
   border-left: 1px solid rgba(0,0,0,0.2);
   &__main {
     height: 100%;
-    display: flex;
     align-items: center;
   }
   &__main-info {

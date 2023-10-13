@@ -1,8 +1,8 @@
 <template>
-    <div @click="rr" class="users-empty" v-if="MainUser < 1">empty</div>
+    <div  class="users-empty" v-if="MainUser < 1">empty</div>
     <div v-else @click="sendId" class="users">
             <div class="users__item" v-for="user in MainUser" :key="user.id" @click="UserId = user.mail">
-                <div v-if="user.mail != TrueName" class="users__contact" >
+                <div @click="rr" v-if="user.mail != TrueName" class="users__contact" >
                     <div  class="users__img"><img src="src/assets/user(1).png" alt="user" class="user-img"></div>
                     <div class="users__info">
                         <div class="users__head">
@@ -40,7 +40,18 @@ const props = defineProps( {
     
 })
 const UserId = ref(0)
+let ScrollBar = ref('')
 
+const rr = () => {
+    setTimeout(() => {
+        ScrollBar = document.querySelectorAll("#messageBody");
+        for(let i = 0; ScrollBar.length > i; i++) {
+            ScrollBar[i].scrollTop = ScrollBar[i].scrollHeight;
+        }
+    }, 20);
+
+    
+}
 
 const emits = defineEmits(['sendId'])
 const sendId = () => {

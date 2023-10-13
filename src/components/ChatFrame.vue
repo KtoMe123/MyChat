@@ -1,6 +1,6 @@
 <template>
 
-    <div class="chat-default" v-if="UsersId === 'def'">Welcome</div>
+    <div @click="ffff" class="chat-default" v-if="UsersId === 'def'">Welcome</div>
     <div 
         v-else 
         :class="['chat-frame', {'chat-frame_hide': user.mail != UsersId }]" 
@@ -14,7 +14,7 @@
                         <template #Content>
                             <div class="chat-info" @click="OpenInfo">
                                 <img @click="Check = !Check" src="src/assets/user(1).png" alt="img" class="header__img">
-                                <div class="chat-info__name">{{user.username}}</div>
+                                <div @click="rrr" class="chat-info__name">{{user.username}}</div>
                             </div>
                             
                         </template>
@@ -25,20 +25,24 @@
                         </template>
                     </main-header>
                 <div class="chat">
-                    <div class="chat__content">
-                        <div 
-                            v-for="message in MessInfo"
-                            :key="message.id"  
-                        >
+                    <div id="messageBody" class="chat__content" @click="VisibleSmile = false">
+                        
+                        <div class="chat__messages">
                             <div 
-                                :class="['chat__message', {'chat__message_my': message.u_from === currentUser}, {'chat__message_frend': message.u_from === UsersId}]"
+                                class="chat__message_bd-mess"
+                                v-for="message in MessInfo"
+                                :key="message.id"  
+                        >
+                        
+                            <div 
+                                :class="['chat__message',{'chat__message_my': message.u_from === currentUser} , {'chat__message_frend': message.u_from === UsersId}]"
                                 v-if="(message.u_to === UsersId && message.u_from === currentUser) || (message.u_to === currentUser && message.u_from === UsersId) "
                             >
                                 <p class="chat__text">{{message.message}}<br><span class="chat__time">{{message.id}}</span></p>
                             </div>
                         </div>
-                        
-                        <div 
+                            <div 
+                            class="chat__message_my-mess"
                             v-for="message in Message"
                             :key="message.id"  
                         >
@@ -50,13 +54,23 @@
                             </div>
                         </div>
                         
+                        </div>
+                        
+                        
                     </div>
-
+                    <div v-if="VisibleSmile === true" class="smile">
+                        <div class="smile__main">
+                            <div 
+                                v-for="(smile, index) in Smiles"
+                                :key="index"
+                            >
+                            <div class="smile__item" @click="AddSmile(smile, Mess)">{{smile}}</div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="input-form">
-                        <ion-icon class="input__icon" name="happy-outline"></ion-icon>
-                        <ion-icon class="input__icon" name="attach-outline"></ion-icon>
+                        <ion-icon class="input__icon" name="happy-outline" @click="OpenSmile"></ion-icon>
                         <MyInput name="messahe-input" v-model="Mess" v-on:keyup.enter="AddMessage" placeholder="Type a message"></MyInput>
-                        <ion-icon class="input__icon" name="mic"></ion-icon>
                     </div>
                     
                 </div>
@@ -73,12 +87,23 @@ import { computed, onMounted, ref } from 'vue'
 import MyInput from './UI/MyInput.vue'
 
 
+
 const Check = ref(false)
 const Mess = ref('')
 const Message = ref([])
+const VisibleSmile = ref(false)
 const MesSend = ref('')
+const Smiles = ['😀', '😁', '😂', '😃', '😄', '😅', '😆', '😇', '😈',
+                '😉', '😊', '😋', '😌', '😍', '😎', '😏', '😐', '😑',
+                '😒', '😓', '😔', '😕', '😖', '😗', '😘', '😙', '😚',
+                '😛', '😜', '😝', '😞', '😟', '😠', '😡', '😢', '😣',
+                '😤', '😥', '😦', '😧', '😨', '😩', '😪', '😫', '😬',
+                '😭', '😮', '😯', '😰', '😱', '😲', '😳', '😴', '😵',
+                '😶', '😷', '😸', '😹', '😺', '😻', '😼', '😽', '😾', '😿',
+                '🙀', '💩', '☠', '👌', '👍', '👎', '🙈', '🙉', '🙊']
 const currentUser = props.UserName
 const MessInfo = ref([])
+let Image = ref()
 const messList = 'http://localhost:8080/api/messange'
 
 const socket = io('http://localhost:3000')
@@ -86,6 +111,18 @@ const socket = io('http://localhost:3000')
 socket.on('receive-message', message => {
     Message.value = (message)
 })
+
+function OpenSmile() {
+    if(VisibleSmile.value === true) {
+        VisibleSmile.value = false
+        return
+    }
+    VisibleSmile.value = true
+}
+document.body.scrollTop = document.body.scrollHeight;
+const AddSmile = (smile) => {
+    Mess.value += smile
+}
 
 const props = defineProps( {
     UsersId: {
@@ -112,19 +149,41 @@ function getMes() {
 getMes()
 
 function AddMessage() {
+    
+    const Hours = ref(new Date().getHours())
+    const Min = ref(new Date().getMinutes())
+
+    if(Hours.value.toString().length === 1) {
+        Hours.value = "0" + Hours.value
+    } 
+    if(Min.value.toString().length === 1) {
+        Min.value = "0" + Min.value
+    } 
+
   const MessInfo = ref({
-    id: `${new Date().getHours()}` + ':' + `${new Date().getMinutes()}`,
+    id: `${Hours.value}` + ':' + `${Min.value}`,
     message: Mess.value,
     u_from: currentUser,
     u_to: props.UsersId,
   })
+  VisibleSmile.value = false
+
+    let ScrollBar = ref('')
+
+    setTimeout(() => {
+        ScrollBar = document.querySelectorAll("#messageBody");
+            for(let i = 0; ScrollBar.length > i; i++) {
+                ScrollBar[i].scrollTop = ScrollBar[i].scrollHeight;
+            }
+    }, 1)
+    
 
     if (Mess.value) {
         Message.value.push(MessInfo.value)
         axios
             .post('http://localhost:8080/api/messange',
             {
-                id: `${new Date().getHours()}` + ':' + `${new Date().getMinutes()}`,
+                id: `${Hours.value}` + ':' + `${Min.value}`,
                 message: Mess.value,
                 u_from: currentUser,
                 u_to: props.UsersId,
@@ -144,6 +203,14 @@ function AddMessage() {
 
 }
 
+
+function ffff() {
+    alert(Hours.value)
+    alert(Min.value)
+}
+
+
+
 const emits = defineEmits(['OpenInfo'])
 function OpenInfo() {
     emits('OpenInfo', Check)
@@ -153,6 +220,39 @@ function OpenInfo() {
 </script>
 
 <style lang="scss" scoped>
+::-webkit-scrollbar-thumb:horizontal {
+  margin-right: 5px;
+}
+
+::-webkit-scrollbar {
+    width: 0;
+}
+
+
+* { 
+    scrollbar-width: none;
+}
+
+.smile {    
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    position: absolute;
+    z-index: 2;
+    bottom: 60px;
+    &__main {
+        width: 341px;
+        height: 130px;
+        border-top-right-radius: 15px;
+        overflow: auto;
+        background: #f0f0f0;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    &__item {
+    font-size: 35px;
+    margin: 10px;
+    cursor: pointer;
+    }
+}
 
 .chat {
     display: flex;
@@ -183,6 +283,11 @@ function OpenInfo() {
             margin-left: 10px;
         }
     }
+    &__messages {
+        transform: scaleY(-1);
+        display: flex;
+        flex-direction: column-reverse;
+    }
     &__message {
         position: relative;
         display: flex;
@@ -194,6 +299,10 @@ function OpenInfo() {
     &__message_my .chat__text {
         background-color: #dcf8c6;
         text-align: right;
+        transform: scaleY(-1);
+    }
+    &__message_frend .chat__text {
+        transform: scaleY(-1);
     }
     &__text {
         text-align: left;
@@ -293,13 +402,11 @@ function OpenInfo() {
         justify-content: space-between;
         align-items: center;
     }
+
     &__icon {
         cursor: pointer;
-        font-size: 29px;
+        font-size: 40px;
         color: #51585c;
-    }
-    &__icon:nth-child(1) {
-        margin-right: 15px;
     }
 }
 
