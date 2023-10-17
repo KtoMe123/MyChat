@@ -6,7 +6,6 @@ import UsersList from '@/components/UsersList.vue'
 
 <template>
   <router-view></router-view>
-    <!-- <MainPage v-if="UsersInfo" :UsersInfo="UsersInfo" :HeadIcons="HeadIcons"/> -->
 </template>
 
 <style>

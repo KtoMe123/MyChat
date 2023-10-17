@@ -59,10 +59,17 @@ function InfoUser(href) {
     .then((response) => response.json())
     .then((data) => maindata.value = data)
 }
+const AllMess = ref('')
+function GetMess() {
+    fetch('http://localhost:8080/api/mess/' + EmailField.value)
+        .then((response) => response.json())
+        .then((data) => AllMess.value = (data))
+}
 
 function f() {
   console.log(maindata.value[0])
 }
+
 
 const submitForm = () => {
   if(maindata.value[0]?.id) { 
@@ -75,7 +82,13 @@ const submitForm = () => {
       if(rule.value.$error) return
     }
     if(PasswordField.value === maindata.value[0].password && EmailField.value === maindata.value[0].mail) {
-      emit('OpenMain', [true, EmailField.value, maindata.value])
+      GetMess()
+      setTimeout(() => {
+        console.log(AllMess.value)
+        emit('OpenMain', [true, EmailField.value, maindata.value, AllMess.value])
+      }, 500)
+      
+      
     }
   } else {
     rule.value.$touch()

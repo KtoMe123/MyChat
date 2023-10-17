@@ -15,10 +15,10 @@
                         <font-awesome-icon :icon="['fas', 'plus']" />
                     </button>
                 </form>
-                <UsersList :usersSort="SortedUsers" :MainUser="SortedUsers" :MainUserInfo="MainUser" :TrueName="TrueName" @sendId="IDget"></UsersList>
+                <UsersList :MyMess="AllMess" :usersSort="SortedUsers" :MainUser="SortedUsers" :MainUserInfo="MainUser" :TrueName="TrueName" @sendId="IDget"></UsersList>
             </div>
             <div :class="['main__chat-frame', {'main__chat-frame_small': open.value === true}]">
-                <ChatFrame @Id="getId" @OpenInfo="OpenInfo" :UsersId="UsersId" :UserName="TrueName" :UsersInfo="SortedUsers" :HeadIcons="HeadIcons"/>
+                <ChatFrame @Id="getId" @OpenInfo="OpenInfo" :UsersId="UsersId" :UserName="TrueName" :UsersInfo="SortedUsers" :TrueName="TrueName" :HeadIcons="HeadIcons"/>
             </div>
             <div :class="[{'main__info-open': open.value === true}, 'main__info']">
                 <InfoForm :UsersId="UsersId" :OpenInfo="open" :UsersInfo="$store.state.UsersInfo"/>
@@ -40,9 +40,10 @@ import {ref, computed} from 'vue'
 import MySearch from '../components/UI/MySearch.vue'
 import { useStore } from 'vuex'
 
-
+const AllMess = ref('')
 
 const AddMail = ref('')
+
 const AddedUser = ref('')
 
 const MainUserList = ref([])
@@ -57,18 +58,10 @@ const HeadIcons = [
         {name: 'ellipsis-vertical'}
 ]
 
-// function InfoUser() {
-//   fetch(SearchUsers + )
-//     .then((response) => response.json())
-//     .then((data) => maindata.value = data)
-// }
-
 const store = useStore()
 const UsersInfo = computed(() => store.state.UsersInfo)
-
 const open = ref(false)
 const UsersId = ref('def')
-
 const SearchUsers = ref(`http://localhost:8080/api/users/`)
 const SearchUser = ref('')
 const MainUser = ref('')
@@ -76,9 +69,12 @@ const Joined = ref(false)
 const TrueName = ref('') 
 const TrueVal = ref([])
 
+
 const isShow = (el) => {
     TrueName.value = el[1]
     MainUser.value = el[2]
+    AllMess.value = el[3]
+    console.log(AllMess.value[0])
     AllVal.value = SortedUsers.value
     return Joined.value = el[0]
 }

@@ -31,6 +31,12 @@ io.on('connection', socket => {
   socket.on('send-message', (message) => {
     io.emit('receive-message', message)
   })
+  socket.on('view-message', (val) => {
+    io.emit('seen-message', val)
+  })
+  socket.on('update-view', (upd) => {
+    io.emit('get-update', upd)
+  })
 
 })
 

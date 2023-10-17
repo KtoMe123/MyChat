@@ -1,6 +1,6 @@
 <template>
 
-    <div @click="ffff" class="chat-default" v-if="UsersId === 'def'">Welcome</div>
+    <div class="chat-default" v-if="UsersId === 'def'">Welcome</div>
     <div 
         v-else 
         :class="['chat-frame', {'chat-frame_hide': user.mail != UsersId }]" 
@@ -31,9 +31,8 @@
                             <div 
                                 class="chat__message_bd-mess"
                                 v-for="message in MessInfo"
-                                :key="message.id"  
+                                :key="message.true_id"  
                         >
-                        
                             <div 
                                 :class="['chat__message',{'chat__message_my': message.u_from === currentUser} , {'chat__message_frend': message.u_from === UsersId}]"
                                 v-if="(message.u_to === UsersId && message.u_from === currentUser) || (message.u_to === currentUser && message.u_from === UsersId) "
@@ -55,8 +54,6 @@
                         </div>
                         
                         </div>
-                        
-                        
                     </div>
                     <div v-if="VisibleSmile === true" class="smile">
                         <div class="smile__main">
@@ -91,6 +88,7 @@ import MyInput from './UI/MyInput.vue'
 const Check = ref(false)
 const Mess = ref('')
 const Message = ref([])
+const MessView = ref([])
 const VisibleSmile = ref(false)
 const MesSend = ref('')
 const Smiles = ['😀', '😁', '😂', '😃', '😄', '😅', '😆', '😇', '😈',
@@ -104,13 +102,14 @@ const Smiles = ['😀', '😁', '😂', '😃', '😄', '😅', '😆', '😇', 
 const currentUser = props.UserName
 const MessInfo = ref([])
 let Image = ref()
-const messList = 'http://localhost:8080/api/messange'
+const messList = 'http://localhost:8080/api/mess'
 
 const socket = io('http://localhost:3000')
 
 socket.on('receive-message', message => {
     Message.value = (message)
 })
+
 
 function OpenSmile() {
     if(VisibleSmile.value === true) {
@@ -138,18 +137,26 @@ const props = defineProps( {
         type: String,
         required: true
     },
+    CheckViews: {
+        type: Array,
+    },
 })
 
 function getMes() {
   fetch(messList)
     .then((response) => response.json())
-    .then((data) => MessInfo.value = data)
+    .then((data) => MessInfo.value = data.filter((v,i,a)=>a.sort((c, b) => c.true_id - b.true_id)))
 }
 
 getMes()
 
 function AddMessage() {
-    
+
+    const ViewMessage = ref({
+        u_from: currentUser, 
+        u_to: props.UsersId
+    })
+
     const Hours = ref(new Date().getHours())
     const Min = ref(new Date().getMinutes())
 
@@ -171,6 +178,7 @@ function AddMessage() {
     let ScrollBar = ref('')
 
     setTimeout(() => {
+        
         ScrollBar = document.querySelectorAll("#messageBody");
             for(let i = 0; ScrollBar.length > i; i++) {
                 ScrollBar[i].scrollTop = ScrollBar[i].scrollHeight;
@@ -179,14 +187,14 @@ function AddMessage() {
     
 
     if (Mess.value) {
-        Message.value.push(MessInfo.value)
         axios
-            .post('http://localhost:8080/api/messange',
+            .post('http://localhost:8080/api/mess',
             {
                 id: `${Hours.value}` + ':' + `${Min.value}`,
                 message: Mess.value,
                 u_from: currentUser,
                 u_to: props.UsersId,
+                seen: false,
             }
             )
             .then(response => {
@@ -195,21 +203,15 @@ function AddMessage() {
             .catch(err => {
                 console.error('Ошибка при добавленнии значения:', err);
             });
+
+        socket.emit('view-message', ViewMessage.value)
+        Message.value.push(MessInfo.value)
+        
         socket.emit('send-message', Message.value)
         Mess.value = ''
     }
     
-    
-
 }
-
-
-function ffff() {
-    alert(Hours.value)
-    alert(Min.value)
-}
-
-
 
 const emits = defineEmits(['OpenInfo'])
 function OpenInfo() {
